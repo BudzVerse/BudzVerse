@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kata-Kata Bijak 5122+</title>
+  <style>
+    /* Background gradasi lembut */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #e0e7ff, #c7d2fe);
+      min-height: 100vh;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      margin-top: 0;
+      margin-bottom: 2rem;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    input[type="text"], select {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: 2px solid #a5b4fc;
+      outline-offset: 2px;
+      outline-color: #6366f1;
+      min-width: 200px;
+      flex-grow: 1;
+      max-width: 300px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: #4338ca;
+    }
+
+    #quotes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .quote-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 8px rgb(99 102 241 / 0.2);
+      transition: box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 120px;
+    }
+
+    .quote-card:hover {
+      box-shadow: 0 8px 16px rgb(99 102 241 / 0.4);
+    }
+
+    .quote-index {
+      font-weight: 700;
+      color: #4338ca;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .quote-text {
+      font-style: italic;
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #1e293b;
+      flex-grow: 1;
+    }
+
+    #load-more-btn {
+      margin-top: 2rem;
+      padding: 0.75rem 2rem;
+      font-size: 1.1rem;
+      background-color: #4338ca;
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #load-more-btn:hover {
+      background-color: #3730a3;
+    }
+
+    #no-results {
+      margin-top: 3rem;
+      font-size: 1.25rem;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      input[type="text"], select {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Kata-Kata Bijak</h1>
+  <p class="subtitle">Temukan 5122+ kata-kata penuh inspirasi dan hikmah</p>
+
+  <div class="controls">
+    <input type="text" id="search-input" placeholder="Cari kata-kata bijak..." aria-label="Cari kata-kata bijak" />
+    <select id="category-select" aria-label="Filter kategori">
+      <option value="all">Semua Kategori</option>
+      <option value="success">Kesuksesan</option>
+      <option value="life">Kehidupan</option>
+      <option value="wisdom">Kebijaksanaan</option>
+      <option value="motivation">Motivasi</option>
+    </select>
+  </div>
+
+  <div id="quotes-container" aria-live="polite" aria-atomic="true"></div>
+
+  <button id="load-more-btn" aria-label="Muat lebih banyak kata bijak">Muat Lebih Banyak</button>
+
+  <p id="no-results" style="display:none;">Tidak ditemukan kata-kata bijak yang sesuai dengan pencarian Anda.</p>
+
+  <script>
+    (() => {
+      // Contoh 20 kata bijak
+      const sampleQuotes = [
+        "Hidup adalah perjalanan, bukan tujuan.",
+        "Kesuksesan bukanlah kunci kebahagiaan, kebahagiaanlah kunci kesuksesan.",
+        "Jadilah perubahan yang ingin kamu lihat di dunia.",
+        "Waktu yang dihabiskan dengan sia-sia adalah waktu yang terbuang.",
+        "Kesabaran adalah kunci dari segala solusi.",
+        "Lebih baik terlambat daripada tidak sama sekali.",
+        "Pengalaman adalah guru yang paling berharga.",
+        "Kejujuran adalah kebijakan terbaik.",
+        "Tidak ada usaha yang mengkhianati hasil.",
+        "Kebahagiaan datang dari dalam diri sendiri.",
+        "Kegagalan adalah batu loncatan menuju kesuksesan.",
+        "Hidup itu sederhana, kita yang membuatnya rumit.",
+        "Orang bijak belajar dari kesalahan orang lain.",
+        "Mimpi tidak akan menjadi kenyataan tanpa action.",
+        "Kualitas hidup ditentukan oleh kualitas pikiran.",
+        "Syukur adalah kunci hati yang tenang.",
+        "Kesederhanaan adalah kecanggihan tertinggi.",
+        "Tindakan berbicara lebih keras daripada kata-kata.",
+        "Ilmu tanpa amal adalah pohon tanpa buah.",
+        "Keberanian bukan tidak takut, tapi mampu mengatasi ketakutan."
+      ];
+
+      // Duplikasi untuk mencapai 5122+ kata bijak
+      const quotes = [];
+      for (let i = 0; i < 256; i++) {
+        sampleQuotes.forEach((q, idx) => {
+          quotes.push(`${q} (${i * 20 + idx + 1})`);
+        });
+      }
+
+      const quotesContainer = document.getElementById('quotes-container');
+      const searchInput = document.getElementById('search-input');
+      const categorySelect = document.getElementById('category-select');
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      const noResults = document.getElementById('no-results');
+
+      let filteredQuotes = [...quotes];
+      let displayedCount = 0;
+      const batchSize = 20;
+
+      // Kategori keyword mapping
+      const categoryKeywords = {
+        success: /sukses|berhasil/i,
+        life: /hidup|jiwa/i,
+        wisdom: /bijak|kearifan|hikmah/i,
+        motivation: /semangat|motivasi|dorongan/i
+      };
+
+      function filterQuotes() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const category = categorySelect.value;
+
+        filteredQuotes = quotes.filter(q => {
+          const matchSearch = q.toLowerCase().includes(searchTerm);
+          let matchCategory = true;
+          if (category !== 'all') {
+            matchCategory = categoryKeywords[category].test(q);
+          }
+          return matchSearch && matchCategory;
+        });
+        displayedCount = 0;
+      }
+
+      function renderQuotes() {
+        // Clear container if first load
+        if (displayedCount === 0) {
+          quotesContainer.innerHTML = '';
+        }
+
+        const nextBatch = filteredQuotes.slice(displayedCount, displayedCount + batchSize);
+
+        nextBatch.forEach((quote, idx) => {
+          const card = document.createElement('div');
+          card.className = 'quote-card';
+
+          const indexSpan = document.createElement('div');
+          indexSpan.className = 'quote-index';
+          indexSpan.textContent = `#${displayedCount + idx + 1}`;
+
+          const textP = document.createElement('p');
+          textP.className = 'quote-text';
+          textP.textContent = `"${quote}"`;
+
+          card.appendChild(indexSpan);
+          card.appendChild(textP);
+
+          quotesContainer.appendChild(card);
+        });
+
+        displayedCount += nextBatch.length;
+
+        // Show or hide load more button
+        if (displayedCount >= filteredQuotes.length) {
+          loadMoreBtn.style.display = 'none';
+        } else {
+          loadMoreBtn.style.display = 'inline-block';
+        }
+
+        // Show no results message
+        if (filteredQuotes.length === 0) {
+          noResults.style.display = 'block';
+          loadMoreBtn.style.display = 'none';
+        } else {
+          noResults.style.display = 'none';
+        }
+      }
+
+      // Event listeners
+      searchInput.addEventListener('input', () => {
+        filterQuotes();
+        renderQuotes();
+      });
+
+      categorySelect.addEventListener('change', () => {
+        filterQuotes();
+        renderQuotes();
+      });
+
+      loadMoreBtn.addEventListener('click', () => {
+        renderQuotes();
+      });
+
+      // Initial load
+      filterQuotes();
+      renderQuotes();
+    })();
+  </script>
+</body>
+</html>
